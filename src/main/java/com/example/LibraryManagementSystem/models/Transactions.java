@@ -28,11 +28,11 @@ public class Transactions {
     @Enumerated(value = EnumType.STRING)
     private TransactionStatus transactionStatus;
 
-//    @CreationTimestamp
-//    private Date createdOn;
-//
-//    @UpdateTimestamp
-//    private Date updatedOn;
+    @CreationTimestamp
+    private Date createdOn;
+
+    @UpdateTimestamp
+    private Date updatedOn;
 
     private Double fine;
 

@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -24,8 +25,8 @@ public class Admin {
     @Column(unique = true,nullable = false)
     private String email;
 
-//    @CreationTimestamp
-//    private Data CreatedOn;
+    @CreationTimestamp
+    private Date CreatedOn;
 
 
     @OneToMany(mappedBy = "admin")

@@ -29,11 +29,11 @@ public class Student {
 
     private Integer age;
 
-//    @CreationTimestamp
-//    private Date createdOn;
-//
-//    @UpdateTimestamp
-//    private Date updatedOn;
+    @CreationTimestamp
+    private Date createdOn;
+
+    @UpdateTimestamp
+    private Date updatedOn;
 
     @OneToMany(mappedBy = "student")
     private List<Book> bookList;  // back reference

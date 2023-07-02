@@ -24,8 +24,8 @@ public class Author {
     @Column(unique = true,nullable = false)
     private String email;
 
-//    @CreationTimestamp
-//    private Date createdOn;
+    @CreationTimestamp
+    private Date createdOn;
 
     @OneToMany(mappedBy = "my_author")
     private List<Book> bookList;

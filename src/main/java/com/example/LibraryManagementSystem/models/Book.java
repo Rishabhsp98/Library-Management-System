@@ -26,11 +26,11 @@ public class Book {
     @Enumerated(value =  EnumType.STRING)        // by default its ordinal(means numbered), we are using string based for better readability
     private Genre genre; //   Either Store as String or ENUM
 
-//    @CreationTimestamp
-//    private Date createOn;
-//
-//    @UpdateTimestamp
-//    private Date updateOn;
+    @CreationTimestamp
+    private Date createOn;
+
+    @UpdateTimestamp
+    private Date updateOn;
 
     @ManyToOne
     @JoinColumn
