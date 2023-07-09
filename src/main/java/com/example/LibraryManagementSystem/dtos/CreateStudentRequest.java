@@ -14,7 +14,6 @@ public class CreateStudentRequest {
     @NotBlank
     private String email;
 
-    @Min(5)
     private Integer age;
 
 

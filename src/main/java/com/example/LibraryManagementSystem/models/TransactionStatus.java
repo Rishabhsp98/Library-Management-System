@@ -4,7 +4,7 @@ package com.example.LibraryManagementSystem.models;
 public enum TransactionStatus {
         PENDING,
 
-        COMPLETE,
+        SUCCESS,
 
         FAILURE,
 }

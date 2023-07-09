@@ -2,9 +2,15 @@ package com.example.LibraryManagementSystem.services;
 
 import com.example.LibraryManagementSystem.models.Author;
 import com.example.LibraryManagementSystem.models.Book;
+import com.example.LibraryManagementSystem.models.Genre;
 import com.example.LibraryManagementSystem.repositories.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -15,7 +21,8 @@ public class BookService {
 
     @Autowired
     BookRepository bookRepository;
-    public void create(Book book) {
+
+    public void createOrUpdate(Book book) {
 
         Author bookauthor = book.getMy_author(); // here this author doesn't have primary key , so in next step
         Author savedauthor = authorService.getOrCreate(bookauthor); // here we are retrieving the complete author details having primary key
@@ -25,5 +32,30 @@ public class BookService {
 
         // now after mapping the foreign key above ,safely we save the book
         bookRepository.save(book);
+    }
+
+    public List<Book> find(String searchKey,String searchValue) throws Exception {
+
+        switch (searchKey)
+        {
+            case "id": {
+                Optional<Book> book = bookRepository.findById(Integer.parseInt(searchValue));
+                if (book.isPresent()) {
+                    return Arrays.asList(book.get());
+                } else {
+                    return new ArrayList<>();
+                }
+
+            }
+            case "genre":
+                return bookRepository.findByGenre(Genre.valueOf(searchValue));
+            case "author_name":
+                return bookRepository.findByMy_author_name(searchValue);
+            case "bookName":
+                return bookRepository.findByName(searchValue);
+            default:
+                throw new Exception("Search Key not Valid" + searchKey);
+        }
+
     }
 }

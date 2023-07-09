@@ -2,6 +2,7 @@ package com.example.LibraryManagementSystem.controllers;
 
 import com.example.LibraryManagementSystem.dtos.CreateStudentRequest;
 import com.example.LibraryManagementSystem.models.Student;
+import com.example.LibraryManagementSystem.models.Transactions;
 import com.example.LibraryManagementSystem.services.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,11 @@ public class StudentController {
     {
         return studentService.find(id);
     }
+
+//    @GetMapping("/student/transactions")
+//    public Transactions getTransactions(@RequestBody GetTransactionRequest getTransactionRequest){
+//
+//    }
 
     @PutMapping("/student/{id}")
     public void updateStudent(@RequestBody CreateStudentRequest studentRequest,@PathVariable Integer id)

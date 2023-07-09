@@ -1,5 +1,6 @@
 package com.example.LibraryManagementSystem.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -23,7 +24,8 @@ public class Book {
 
     private String name;
 
-    @Enumerated(value =  EnumType.STRING)        // by default its ordinal(means numbered), we are using string based for better readability
+    @Enumerated(value = EnumType.STRING)
+    // by default its ordinal(means numbered), we are using string based for better readability
     private Genre genre; //   Either Store as String or ENUM
 
     @CreationTimestamp
@@ -34,14 +36,16 @@ public class Book {
 
     @ManyToOne
     @JoinColumn
-    private Author my_author;
+    @JsonIgnoreProperties({"bookList"})   // to avoid infinite loop
+    private Author my_author;             // my_author was again calling book, which was again calling my_author
 
     @ManyToOne
     @JoinColumn
-    private Student student;
+    @JsonIgnoreProperties({"bookList"})   // to avoid infinite loop
+    private Student student;              // student was again calling book, which was again calling student
 
     @OneToMany(mappedBy = "book")
-    private List<Transactions> transactions;
+    private List<Transactions> transactionList;
 }
 
 
