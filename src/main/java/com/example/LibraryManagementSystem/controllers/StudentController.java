@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @RestController
 public class StudentController {
@@ -23,6 +26,11 @@ public class StudentController {
     @GetMapping("/student")
     public Student findStudent(@PathVariable Integer id)
     {
+        long epochTime = 1563370941000L;
+
+        LocalDate date = Instant.ofEpochMilli(epochTime).atZone(ZoneId.systemDefault()).toLocalDate();
+
+        System.out.println(date);
         return studentService.find(id);
     }
 

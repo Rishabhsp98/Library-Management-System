@@ -2,8 +2,6 @@ package com.example.LibraryManagementSystem.dtos;
 
 import com.example.LibraryManagementSystem.models.Student;
 
-import javax.persistence.Column;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 public class CreateStudentRequest {

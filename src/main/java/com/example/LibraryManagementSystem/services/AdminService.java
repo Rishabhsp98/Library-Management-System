@@ -13,11 +13,17 @@ public class AdminService {
     AdminRepository adminRepository;
 
     public void create(Admin admin) {
-        adminRepository.save(admin);
+        if(admin != null) {
+            adminRepository.save(admin);
+        }
     }
 
     public Admin find(Integer adminId){
-        return  adminRepository.findById(adminId).orElse(null);
+
+        if(adminId != null) {
+            return  adminRepository.findById(adminId).orElse(null);
+        }
+        return null;
     }
 
 }

@@ -4,6 +4,8 @@ import com.example.LibraryManagementSystem.dtos.CreateBookRequest;
 import com.example.LibraryManagementSystem.dtos.SearchBookRequest;
 import com.example.LibraryManagementSystem.models.Book;
 import com.example.LibraryManagementSystem.services.BookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +13,16 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class BookController {
+    private static Logger logger = LoggerFactory.getLogger(BookController.class);
 
     @Autowired
     BookService bookService;
 
     @PostMapping("/book")
     public void createBook(@RequestBody CreateBookRequest createBookRequest) {
+        logger.info("REST request to Add BookRequest - {}",createBookRequest);
         bookService.createOrUpdate(createBookRequest.to());
     }
 
