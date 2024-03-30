@@ -2,8 +2,14 @@ package com.example.LibraryManagementSystem.dtos;
 
 import com.example.LibraryManagementSystem.models.Student;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class CreateStudentRequest {
 
     @NotBlank

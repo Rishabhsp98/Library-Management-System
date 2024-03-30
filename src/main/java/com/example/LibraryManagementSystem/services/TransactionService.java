@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +39,22 @@ public class TransactionService {
     Integer duration;
 
     public String InitiateTxn(InitiateTransactionRequest initiateTransactionRequest) throws Exception {
+        /**
+         * Issuance
+         * 1. If the book is available or not and student is valid or not
+         * 2. entry in the Txn
+         * 3. we need to check if student has reached the maximum limit of issuance
+         * 4. book to be assigned to a student ==> update in book table
+         *
+         */
 
+        /**
+         * Return
+         * 1. If the book is valid or not and student is valid or not
+         * 2. entry in the Txn table
+         * 3. due date check and fine calculation
+         * 4. if there is no fine, then de-allocate the book from student's name ==> book table
+         */
         // based on type of transaction we route to either issue or return
         return initiateTransactionRequest.getTransactionType() == TransactionType.ISSUE ?
                 issuance(initiateTransactionRequest) : returnBook(initiateTransactionRequest);
@@ -48,40 +64,44 @@ public class TransactionService {
     private String issuance(InitiateTransactionRequest initiateTransactionRequest) throws Exception {
         Student student = studentService.find(initiateTransactionRequest.getStudentId());
         Admin admin = adminService.find(initiateTransactionRequest.getAdminId());
-        List<Book> bookList = bookService.find("id",String.valueOf(initiateTransactionRequest.getBookId()));
+        List<Book> bookList = bookService.find("id", String.valueOf(initiateTransactionRequest.getBookId()));
 
-        Book book = (bookList != null && bookList.size() > 0) ? bookList.get(0) : null;
+        Book book = bookList != null && bookList.size() > 0 ? bookList.get(0) : null;
 
-        if(student == null || admin == null || book == null || book.getStudent() != null || student.getBookList().size() >= maxBooksAllowed)
-        {
-            throw new Exception("Invalid Request");
+        if (student == null
+                || admin == null
+                || book == null
+                || book.getStudent() != null
+                || student.getBookList().size() >= maxBooksAllowed) {
+            throw new Exception("Invalid request");
         }
-        // now basic checks are done, now we are creating the transaction object of those properties, we could do this in DTOS as well
 
-        Transactions transactions = null;
+        Transactions transaction = null;
+
         try {
-            transactions = Transactions.builder()
+            transaction = Transactions.builder()
                     .txnId(UUID.randomUUID().toString())
                     .student(student)
+                    .book(book)
                     .admin(admin)
                     .transactionType(initiateTransactionRequest.getTransactionType())
-                    .transactionStatus(TransactionStatus.PENDING).
-                    build();
+                    .transactionStatus(TransactionStatus.PENDING)
+                    .build();
 
-            transactionRepository.save(transactions); // this object got saved in our database
+            transactionRepository.save(transaction);
+
             book.setStudent(student);
 
-            bookService.createOrUpdate(book); // if book already there just update the student
-
-            transactions.setTransactionStatus(TransactionStatus.SUCCESS);
+            bookService.createOrUpdate(book);
+            transaction.setTransactionStatus(TransactionStatus.SUCCESS);
 
         }catch (Exception e){
-            transactions.setTransactionStatus(TransactionStatus.FAILURE);
+            transaction.setTransactionStatus(TransactionStatus.FAILURE);
         }finally {
-            transactionRepository.save(transactions);
+            transactionRepository.save(transaction);
         }
 
-        return transactions.getTxnId();
+        return transaction.getTxnId();
     }
 
     private String returnBook(InitiateTransactionRequest initiateTransactionRequest) throws Exception {
@@ -93,52 +113,56 @@ public class TransactionService {
          * 3. due date check and fine calculation
          * 4. if there is no fine, then de-allocate the book from student's name ==> book table
          */
-        List<Book> bookList = bookService.find("id",String.valueOf(initiateTransactionRequest.getBookId()));
+
         Student student = studentService.find(initiateTransactionRequest.getStudentId());
         Admin admin = adminService.find(initiateTransactionRequest.getAdminId());
+        List<Book> bookList = bookService.find("id", String.valueOf(initiateTransactionRequest.getBookId()));
 
         Book book = bookList != null && bookList.size() > 0 ? bookList.get(0) : null;
 
-
-        if(bookList == null || student == null || admin == null || book.getStudent().getId() != student.getId()){
-            throw new Exception("Invalid Request");
+        if (student == null
+                || admin == null // admin is null
+                || book == null
+                || book.getStudent() == null  // if the book is assigned to someone or not
+                || book.getStudent().getId() != student.getId()) { // if the book is assigned to the same student
+            // which is requesting to return or not
+            throw new Exception("Invalid request");
         }
 
         // Getting the corresponding issuance txn
-        Transactions issueTxn = transactionRepository.findTopByStudentAndBookAndTransactionTypeOrderByIdDesc(student.getId(),book.getId(),TransactionType.ISSUE);
-
-        if(issueTxn == null)
-        {
-            throw new Exception("InValid Request");
+        Transactions issuanceTxn = transactionRepository.findTopByStudentAndBookAndTransactionTypeOrderByIdDesc(
+                student, book, TransactionType.ISSUE);
+        if(issuanceTxn == null){
+            throw new Exception("Invalid request");
         }
-        // Calculate Fine accordingly
-        Integer fine = calculateFine(issueTxn.getCreatedOn());
 
-        // logging the transactions
-        Transactions transactions = null;
+        Transactions transaction = null;
         try {
-            transactions = Transactions.builder()
+            Integer fine = calculateFine(issuanceTxn.getCreatedOn());
+            transaction = Transactions.builder()
                     .txnId(UUID.randomUUID().toString())
                     .student(student)
+                    .book(book)
                     .admin(admin)
                     .transactionType(initiateTransactionRequest.getTransactionType())
                     .transactionStatus(TransactionStatus.PENDING)
                     .fine(fine)
                     .build();
-            transactionRepository.save(transactions);
 
+            transactionRepository.save(transaction);
 
             if (fine == 0) {
                 book.setStudent(null);
                 bookService.createOrUpdate(book);
-                transactions.setTransactionStatus(TransactionStatus.SUCCESS);
+                transaction.setTransactionStatus(TransactionStatus.SUCCESS);
             }
         }catch (Exception e){
-                transactions.setTransactionStatus(TransactionStatus.FAILURE);
+            transaction.setTransactionStatus(TransactionStatus.FAILURE);
         }finally {
-                transactionRepository.save(transactions);
+            transactionRepository.save(transaction);
         }
-        return transactions.getTxnId();
+
+        return transaction.getTxnId();
     }
 
     // Here we calculate on the basis of the last transaction issued to this student
@@ -169,19 +193,21 @@ public class TransactionService {
         return 0;
     }
 
-    public void payfine(MakePaymentRequest makePaymentRequest) throws Exception {
-        Transactions returntransactions = transactionRepository.findByTxnId(String.valueOf(makePaymentRequest.getTransactionId()));
+    public void payFine(Integer amount, Integer studentId, String txnId) throws Exception {
 
-        Book book = returntransactions.getBook();   // extract the book mapped to this transaction
-        if(returntransactions.getFine() == makePaymentRequest.getAmount() && book.getStudent() != null && book.getStudent().getId() == makePaymentRequest.getStudentId()){
-            returntransactions.setTransactionStatus(TransactionStatus.SUCCESS);
+        Transactions returnTxn = transactionRepository.findByTxnId(txnId);
+
+        Book book = returnTxn.getBook();
+
+        if(Objects.equals(returnTxn.getFine(), amount) && book.getStudent() != null && Objects.equals(book.getStudent().getId(), studentId)){
+            returnTxn.setTransactionStatus(TransactionStatus.SUCCESS);
             book.setStudent(null);
             bookService.createOrUpdate(book);
-            transactionRepository.save(returntransactions);
+            transactionRepository.save(returnTxn);
+        }else{
+            throw new Exception("invalid request");
         }
-        else{
-            throw new Exception("Invalid Request!");
-        }
+
     }
 
 }

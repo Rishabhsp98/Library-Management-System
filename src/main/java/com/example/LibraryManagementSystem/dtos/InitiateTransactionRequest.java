@@ -4,7 +4,7 @@ package com.example.LibraryManagementSystem.dtos;
 import com.example.LibraryManagementSystem.models.TransactionType;
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 @Getter
 @Setter

@@ -2,10 +2,12 @@ package com.example.LibraryManagementSystem.models;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
+import jakarta.validation.*;
 import java.util.Date;
 import java.util.List;
 

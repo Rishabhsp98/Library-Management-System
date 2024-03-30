@@ -3,11 +3,14 @@ package com.example.LibraryManagementSystem.controllers;
 import com.example.LibraryManagementSystem.dtos.CreateStudentRequest;
 import com.example.LibraryManagementSystem.models.Student;
 import com.example.LibraryManagementSystem.models.Transactions;
+import com.example.LibraryManagementSystem.repositories.StudentRepository;
 import com.example.LibraryManagementSystem.services.StudentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -15,23 +18,22 @@ import java.time.ZoneId;
 @RestController
 public class StudentController {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    StudentRepository studentRepository;
+
     @PostMapping("/student")
-    public void createStudent(@RequestBody @Valid CreateStudentRequest studentRequest){
-        studentService.create(studentRequest.to());
+    public void create(@RequestBody CreateStudentRequest createStudentRequest) {
+        logger.info("REST request to create a student, {},{},{}", createStudentRequest.getName(),createStudentRequest.getEmail(),createStudentRequest.getAge());
+        studentRepository.save(createStudentRequest.to());
     }
 
     @GetMapping("/student")
-    public Student findStudent(@PathVariable Integer id)
-    {
-        long epochTime = 1563370941000L;
-
-        LocalDate date = Instant.ofEpochMilli(epochTime).atZone(ZoneId.systemDefault()).toLocalDate();
-
-        System.out.println(date);
-        return studentService.find(id);
+    public Student find(@RequestParam("id") int studentId) {
+        return studentRepository.findById(studentId).orElse(null);
     }
 
 //    @GetMapping("/student/transactions")

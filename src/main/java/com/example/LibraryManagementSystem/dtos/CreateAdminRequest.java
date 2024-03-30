@@ -3,7 +3,7 @@ package com.example.LibraryManagementSystem.dtos;
 import com.example.LibraryManagementSystem.models.Admin;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter

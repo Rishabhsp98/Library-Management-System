@@ -2,12 +2,12 @@ package com.example.LibraryManagementSystem.models;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
+import jakarta.validation.*;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class Student {
 
     private String name;
 
-    @Column(unique = true,nullable = false)
+    @Column(unique = true)
     private String email;
 
     private Integer age;

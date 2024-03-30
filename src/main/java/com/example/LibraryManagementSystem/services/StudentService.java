@@ -17,6 +17,7 @@ public class StudentService {
     StudentRepository studentRepository;
 
     public void create(Student student) {
+        logger.info("Student object, {}",student);
         studentRepository.save(student);
     }
 
