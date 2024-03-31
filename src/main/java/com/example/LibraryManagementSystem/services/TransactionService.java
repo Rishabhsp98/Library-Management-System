@@ -193,21 +193,19 @@ public class TransactionService {
         return 0;
     }
 
-    public void payFine(Integer amount, Integer studentId, String txnId) throws Exception {
+    public void PayFine(MakePaymentRequest makePaymentRequest) throws Exception {
+        Transactions returntransactions = transactionRepository.findByTxnId(String.valueOf(makePaymentRequest.getTransactionId()));
 
-        Transactions returnTxn = transactionRepository.findByTxnId(txnId);
-
-        Book book = returnTxn.getBook();
-
-        if(Objects.equals(returnTxn.getFine(), amount) && book.getStudent() != null && Objects.equals(book.getStudent().getId(), studentId)){
-            returnTxn.setTransactionStatus(TransactionStatus.SUCCESS);
+        Book book = returntransactions.getBook();   // extract the book mapped to this transaction
+        if(Objects.equals(returntransactions.getFine(), makePaymentRequest.getAmount()) && book.getStudent() != null && Objects.equals(book.getStudent().getId(), makePaymentRequest.getStudentId())){
+            returntransactions.setTransactionStatus(TransactionStatus.SUCCESS);
             book.setStudent(null);
             bookService.createOrUpdate(book);
-            transactionRepository.save(returnTxn);
-        }else{
-            throw new Exception("invalid request");
+            transactionRepository.save(returntransactions);
         }
-
+        else{
+            throw new Exception("Invalid Request!");
+        }
     }
 
 }
